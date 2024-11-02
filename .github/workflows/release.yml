@@ -5,7 +5,7 @@ on:
     branches:
       - main
     tags:
-      - 'v*'
+      - "v*"
 
 jobs:
   release-linux:
@@ -45,6 +45,9 @@ jobs:
         run: echo "GITHUB_TOKEN is set"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: List Tags
+        run: git tag
 
       - name: Run semantic release
         id: release
@@ -100,6 +103,9 @@ jobs:
         run: echo "GITHUB_TOKEN is set"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: List Tags
+        run: git tag
 
       - name: Run semantic release
         id: release
@@ -157,6 +163,9 @@ jobs:
         run: echo "GITHUB_TOKEN is set"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: List Tags
+        run: git tag
 
       - name: Run semantic release
         id: release
