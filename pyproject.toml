@@ -1,11 +1,10 @@
-
 [tool.poetry]
 name = "archive-downloader"
 version = "0.1.0"
 description = "A starter CLI app project in Python"
 authors = ["Andy Vandaric <andyvandaric@gmail.com>"]
 readme = "README.md"
-repository = "https://github.com/andyvandaric/archive-downloader"  # Sesuaikan URL dengan nama repo Anda
+repository = "https://github.com/andyvandaric/archive-downloader"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.14"
@@ -22,14 +21,14 @@ python-semantic-release = "^9.12.0"
 pyinstaller = "^6.11.0"
 
 [tool.semantic_release]
-version_source = "pyproject"  # Ambil versi dari pyproject.toml
+version_source = "pyproject"
 changelog_file = "CHANGELOG.md"
 patch_without_tag = false
 commit_parser = "angular"
 
 [tool.semantic_release.changelog]
-mode = "update"  # Mode update, hanya menambahkan informasi terbaru
-insertion_flag = "<!-- version list -->"  # Flag untuk penempatan informasi baru dalam changelog
+mode = "update"
+insertion_flag = "<!-- version list -->"
 exclude_commit_patterns = [
   '''chore(?:\([^)]*?\))?: .+''',
   '''ci(?:\([^)]*?\))?: .+''',
@@ -39,7 +38,6 @@ exclude_commit_patterns = [
   '''build\((?!deps\): .+)''',
   '''Merged? .*'''
 ]
-
 
 [build-system]
 requires = ["poetry-core"]

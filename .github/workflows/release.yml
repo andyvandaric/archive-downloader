@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     branches:
-      - main # atau branch utama Anda
+      - main
 
 jobs:
   release-linux:
@@ -15,7 +15,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: "3.12" # Sesuaikan dengan versi Python Anda
+          python-version: "3.12"
 
       - name: Install Poetry
         run: |
@@ -23,28 +23,30 @@ jobs:
           echo "${{ github.workspace }}/.local/bin" >> $GITHUB_PATH
 
       - name: Install dependencies
-        run: poetry install # Menginstal dependensi yang didefinisikan di pyproject.toml
+        run: |
+          pip install poetry
+          poetry install --with dev
 
       - name: Build standalone application
-        run: poetry run python build.py # Menjalankan skrip build
+        run: poetry run python build.py
 
       - name: Zip executable
-        run: zip -r archive-downloader-linux.zip dist/* # Mengompresi file executable ke ZIP
+        run: zip -r archive-downloader-linux.zip dist/*
 
       - name: Run semantic release
         id: release
         run: |
           poetry run semantic-release publish
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Token untuk mengakses GitHub
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload release assets
         uses: actions/upload-release-asset@v1
         with:
-          upload_url: ${{ steps.release.outputs.upload_url }} # URL untuk mengunggah ke rilis
-          asset_path: archive-downloader-linux.zip # Path ke file ZIP
-          asset_name: archive-downloader-linux.zip # Nama file yang diunggah
-          asset_content_type: application/zip # Tipe konten
+          upload_url: ${{ steps.release.outputs.upload_url }}
+          asset_path: archive-downloader-linux.zip
+          asset_name: archive-downloader-linux.zip
+          asset_content_type: application/zip
 
   release-macos:
     runs-on: macos-latest
@@ -55,7 +57,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: "3.12" # Sesuaikan dengan versi Python Anda
+          python-version: "3.12"
 
       - name: Install Poetry
         run: |
@@ -63,28 +65,30 @@ jobs:
           echo "${{ github.workspace }}/.local/bin" >> $GITHUB_PATH
 
       - name: Install dependencies
-        run: poetry install # Menginstal dependensi yang didefinisikan di pyproject.toml
+        run: |
+          pip install poetry
+          poetry install --with dev
 
       - name: Build standalone application
-        run: poetry run python build.py # Menjalankan skrip build
+        run: poetry run python build.py
 
       - name: Zip executable
-        run: zip -r archive-downloader-macos.zip dist/* # Mengompresi file executable ke ZIP
+        run: zip -r archive-downloader-macos.zip dist/*
 
       - name: Run semantic release
         id: release
         run: |
           poetry run semantic-release publish
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Token untuk mengakses GitHub
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload release assets
         uses: actions/upload-release-asset@v1
         with:
-          upload_url: ${{ steps.release.outputs.upload_url }} # URL untuk mengunggah ke rilis
-          asset_path: archive-downloader-macos.zip # Path ke file ZIP
-          asset_name: archive-downloader-macos.zip # Nama file yang diunggah
-          asset_content_type: application/zip # Tipe konten
+          upload_url: ${{ steps.release.outputs.upload_url }}
+          asset_path: archive-downloader-macos.zip
+          asset_name: archive-downloader-macos.zip
+          asset_content_type: application/zip
 
   release-windows:
     runs-on: windows-latest
@@ -95,20 +99,21 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: "3.12" # Sesuaikan dengan versi Python Anda
+          python-version: "3.12"
 
       - name: Install Poetry
         run: |
           python -m pip install --upgrade pip
-          python -m pip install poetry  # Install Poetry menggunakan pip
+          python -m pip install poetry
 
       - name: Install dependencies
         run: |
-          poetry install
+          pip install poetry
+          poetry install --with dev
 
       - name: Build standalone application
         run: |
-          python build.py  # Menjalankan skrip build
+          python build.py
 
       - name: Zip executable
         run: |
@@ -119,13 +124,12 @@ jobs:
         run: |
           poetry run semantic-release publish
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Token untuk mengakses GitHub
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload release assets
         uses: actions/upload-release-asset@v1
         with:
-          upload_url: ${{ steps.release.outputs.upload_url }} # URL untuk mengunggah ke rilis
-          asset_path: archive-downloader-windows.zip # Path ke file ZIP
-          asset_name: archive-downloader-windows.zip # Nama file yang diunggah
-          asset_content_type: application/zip # Tipe konten
-
+          upload_url: ${{ steps.release.outputs.upload_url }}
+          asset_path: archive-downloader-windows.zip
+          asset_name: archive-downloader-windows.zip
+          asset_content_type: application/zip
