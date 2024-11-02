@@ -12,6 +12,8 @@ import typer
 from tqdm import tqdm
 from datetime import datetime
 from bs4 import BeautifulSoup
+from rich.logging import RichHandler  # Import RichHandler dari rich
+from rich.console import Console  # Import Console untuk output
 
 
 class ArchiveDownloader:
@@ -23,6 +25,7 @@ class ArchiveDownloader:
             base_url (str): Base URL of the archive.org content
             project_dir (str): Base project directory
         """
+        self.console = Console()  # Initialize the console instance
         self.base_url = base_url
         self.project_dir = project_dir
         self.reciter_name = self.extract_reciter_name(base_url)
@@ -38,7 +41,10 @@ class ArchiveDownloader:
         logging.basicConfig(
             level=logging.INFO,
             format="%(asctime)s - %(levelname)s - %(message)s",
-            handlers=[logging.FileHandler(log_file), logging.StreamHandler()],
+            handlers=[
+                RichHandler(rich_tracebacks=True, show_time=False),
+                logging.FileHandler(log_file),
+            ],
         )
         self.logger = logging.getLogger(__name__)
 
@@ -187,7 +193,15 @@ class ArchiveDownloader:
                 for file_info in files
             ]
             for future in concurrent.futures.as_completed(futures):
-                downloaded_files.append(future.result())
+                result = future.result()
+                downloaded_files.append(result)
+                # Tampilkan informasi hasil download di terminal dengan Rich
+                if result["status"] == "downloaded":
+                    self.console.print(f"[green]Downloaded:[/green] {result['filename']}")  # type: ignore
+                elif result["status"] == "already_downloaded":
+                    self.console.print(f"[yellow]Already exists:[/yellow] {result['filename']}")  # type: ignore
+                else:
+                    self.console.print(f"[red]Error:[/red] {result['filename']} - {result.get('error', 'Unknown error')}")  # type: ignore
 
         self.create_index(downloaded_files)
 
