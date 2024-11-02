@@ -33,6 +33,12 @@ jobs:
       - name: Zip executable
         run: zip -r archive-downloader-linux.zip dist/*
 
+      - name: Configure git for semantic-release
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+
       - name: Run semantic release
         id: release
         run: |
@@ -40,6 +46,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PYTHON_KEYRING_BACKEND: keyring.backends.null.Keyring
+          DEBUG: semantic-release:*
 
       - name: Upload release assets
         uses: actions/upload-release-asset@v1
@@ -76,6 +83,12 @@ jobs:
       - name: Zip executable
         run: zip -r archive-downloader-macos.zip dist/*
 
+      - name: Configure git for semantic-release
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+
       - name: Run semantic release
         id: release
         run: |
@@ -83,6 +96,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PYTHON_KEYRING_BACKEND: keyring.backends.null.Keyring
+          DEBUG: semantic-release:*
 
       - name: Upload release assets
         uses: actions/upload-release-asset@v1
@@ -119,7 +133,13 @@ jobs:
 
       - name: Zip executable
         run: |
-          powershell -Command "Compress-Archive -Path 'dist/*' -DestinationPath 'archive-downloader-windows.zip'"  # Mengompresi file executable ke ZIP
+          powershell -Command "Compress-Archive -Path 'dist/*' -DestinationPath 'archive-downloader-windows.zip'"
+
+      - name: Configure git for semantic-release
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
 
       - name: Run semantic release
         id: release
@@ -128,6 +148,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PYTHON_KEYRING_BACKEND: keyring.backends.null.Keyring
+          DEBUG: semantic-release:*
 
       - name: Upload release assets
         uses: actions/upload-release-asset@v1
