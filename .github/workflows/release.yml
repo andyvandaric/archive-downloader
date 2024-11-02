@@ -99,8 +99,8 @@ jobs:
 
       - name: Install Poetry
         run: |
-          (Invoke-WebRequest -Uri https://install.python-poetry.org -UseBasicParsing).Content | python -
-          $env:PATH += ";$env:USERPROFILE\.local\bin"  # Tambahkan Poetry ke PATH
+          python -m pip install --upgrade pip
+          python -m pip install poetry  # Install Poetry menggunakan pip
 
       - name: Install dependencies
         run: |

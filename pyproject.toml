@@ -3,7 +3,7 @@
 name = "archive-downloader"
 version = "0.1.0"
 description = "A starter CLI app project in Python"
-authors = ["Your Name <your.email@example.com>"]
+authors = ["Andy Vandaric <andyvandaric@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
