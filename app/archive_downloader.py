@@ -128,24 +128,51 @@ class ArchiveDownloader:
             return {"filename": filename, "status": "already_downloaded"}
 
         try:
+            # Command to download using aria2
             cmd = [
                 "aria2c",
-                "-x",
-                str(max_connections),
-                "-s",
-                str(max_connections),
-                "-d",
-                str(download_dir),
-                "-o",
-                filename,
+                "-x", str(max_connections),
+                "-s", str(max_connections),
+                "--file-allocation=trunc",
+                "--console-log-level=error",  # Hide unnecessary logs
+                "-d", str(download_dir),
+                "-o", filename,
                 url,
             ]
-            result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            if result.returncode == 0:
+
+            # Initialize subprocess
+            process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+            # Initialize tqdm progress bar
+            pbar = tqdm(total=0, unit='B', unit_scale=True, desc=filename)
+
+            while True:
+                output = process.stdout.readline()
+                if output == '' and process.poll() is not None:
+                    break
+                if output:
+                    # Check for download progress
+                    match = re.search(r'(\d+(?:\.\d+)?)\s*(MiB|KiB|KB|MB)/(\d+(?:\.\d+)?)\s*(MiB|KiB|KB|MB)\s*\((\d+)%\)', output)
+                    if match:
+                        # Extract data from match
+                        downloaded = float(match.group(1)) * (1024 * (1024 if match.group(2) == 'MiB' else 1))  # Convert to bytes
+                        total = float(match.group(3)) * (1024 * (1024 if match.group(4) == 'MiB' else 1))  # Convert to bytes
+                        
+                        # Update progress bar
+                        pbar.total = total
+                        pbar.n = downloaded
+                        pbar.refresh()
+                        pbar.update(downloaded - pbar.n)
+
+            # Close progress bar on completion
+            pbar.close()
+            print()  # Move to the next line after download completes
+
+            if process.returncode == 0:
                 self.logger.info(f"Downloaded: {filename}")
                 return {"filename": filename, "status": "downloaded"}
             else:
-                error_msg = result.stderr.decode()
+                error_msg = process.stderr.read()
                 self.logger.error(f"Error downloading {filename}: {error_msg}")
                 return {"filename": filename, "status": "error", "error": error_msg}
         except Exception as e:
@@ -197,11 +224,11 @@ class ArchiveDownloader:
                 downloaded_files.append(result)
                 # Tampilkan informasi hasil download di terminal dengan Rich
                 if result["status"] == "downloaded":
-                    self.console.print(f"[green]Downloaded:[/green] {result['filename']}")  # type: ignore
+                    self.console.print(f"[green]Downloaded:[/green] {result['filename']}")
                 elif result["status"] == "already_downloaded":
-                    self.console.print(f"[yellow]Already exists:[/yellow] {result['filename']}")  # type: ignore
+                    self.console.print(f"[yellow]Already exists:[/yellow] {result['filename']}")
                 else:
-                    self.console.print(f"[red]Error:[/red] {result['filename']} - {result.get('error', 'Unknown error')}")  # type: ignore
+                    self.console.print(f"[red]Error:[/red] {result['filename']} - {result.get('error', 'Unknown error')}")
 
         self.create_index(downloaded_files)
 
