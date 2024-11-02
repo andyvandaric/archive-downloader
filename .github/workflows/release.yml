@@ -64,6 +64,9 @@ jobs:
           PYTHON_KEYRING_BACKEND: keyring.backends.null.Keyring
           DEBUG: semantic-release:*
 
+      - name: Debug release output
+        run: echo "${{ steps.release.outputs }}"
+
       - name: Upload release assets
         uses: actions/upload-release-asset@v1
         with:
@@ -127,6 +130,9 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PYTHON_KEYRING_BACKEND: keyring.backends.null.Keyring
           DEBUG: semantic-release:*
+
+      - name: Debug release output
+        run: echo "${{ steps.release.outputs }}"
 
       - name: Upload release assets
         uses: actions/upload-release-asset@v1
@@ -193,6 +199,9 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PYTHON_KEYRING_BACKEND: keyring.backends.null.Keyring
           DEBUG: semantic-release:*
+
+      - name: Debug release output
+        run: echo "${{ steps.release.outputs }}"
 
       - name: Upload release assets
         uses: actions/upload-release-asset@v1
