@@ -1,6 +1,7 @@
 [tool.poetry]
 name = "archive-downloader"
-version = "0.1.0"
+version = "0.1.1"
+upload = { type = "github", tag = "v{version}" }
 description = "Archive Downloader simplifies bulk downloads from archive.org in Python"
 authors = ["Andy Vandaric <andyvandaric@gmail.com>"]
 readme = "README.md"
