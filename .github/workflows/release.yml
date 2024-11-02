@@ -109,7 +109,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install poetry
-          poetry install --with dev
+          poetry install
 
       - name: Build standalone application
         run: |
