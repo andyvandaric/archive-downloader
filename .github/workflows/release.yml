@@ -47,7 +47,7 @@ jobs:
       - name: Run semantic release
         id: release
         run: |
-          poetry run semantic-release publish
+          poetry run semantic-release publish --debug
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PYTHON_KEYRING_BACKEND: keyring.backends.null.Keyring
@@ -102,7 +102,7 @@ jobs:
       - name: Run semantic release
         id: release
         run: |
-          poetry run semantic-release publish
+          poetry run semantic-release publish --debug
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PYTHON_KEYRING_BACKEND: keyring.backends.null.Keyring
@@ -159,7 +159,7 @@ jobs:
       - name: Run semantic release
         id: release
         run: |
-          poetry run semantic-release publish
+          poetry run semantic-release publish --debug
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PYTHON_KEYRING_BACKEND: keyring.backends.null.Keyring

@@ -1,6 +1,7 @@
 [tool.poetry]
 name = "archive-downloader"
 version = "0.1.0"
+tag_format = "v{version}"
 description = "A starter CLI app project in Python"
 authors = ["Andy Vandaric <andyvandaric@gmail.com>"]
 readme = "README.md"
