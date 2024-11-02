@@ -1,7 +1,6 @@
 [tool.poetry]
 name = "archive-downloader"
 version = "0.1.1"
-upload = { type = "github", tag = "v{version}" }
 description = "Archive Downloader simplifies bulk downloads from archive.org in Python"
 authors = ["Andy Vandaric <andyvandaric@gmail.com>"]
 readme = "README.md"
@@ -24,6 +23,7 @@ pyinstaller = "^6.11.0"
 
 [tool.semantic_release]
 version_source = "pyproject"
+upload = { type = "github", tag = "v{version}" }
 changelog_file = "CHANGELOG.md"
 patch_without_tag = false
 commit_parser = "angular"
