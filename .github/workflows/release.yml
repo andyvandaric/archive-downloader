@@ -39,6 +39,7 @@ jobs:
           poetry run semantic-release publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PYTHON_KEYRING_BACKEND: keyring.backends.null.Keyring
 
       - name: Upload release assets
         uses: actions/upload-release-asset@v1
@@ -81,6 +82,7 @@ jobs:
           poetry run semantic-release publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PYTHON_KEYRING_BACKEND: keyring.backends.null.Keyring
 
       - name: Upload release assets
         uses: actions/upload-release-asset@v1
@@ -113,7 +115,7 @@ jobs:
 
       - name: Build standalone application
         run: |
-          python build.py
+          poetry run python build.py
 
       - name: Zip executable
         run: |
@@ -125,6 +127,7 @@ jobs:
           poetry run semantic-release publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PYTHON_KEYRING_BACKEND: keyring.backends.null.Keyring
 
       - name: Upload release assets
         uses: actions/upload-release-asset@v1
