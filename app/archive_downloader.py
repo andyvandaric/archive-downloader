@@ -1,14 +1,17 @@
 import os
 import json
+import concurrent.futures  # Import langsung futures di sini
 import requests
-import concurrent.futures
-from urllib.parse import urljoin, urlparse
-from bs4 import BeautifulSoup  # type: ignore
+import subprocess
+import psutil
 from pathlib import Path
+from urllib.parse import urljoin
 import re
 import logging
 import typer
-from tqdm import tqdm  # Progress bar
+from tqdm import tqdm
+from datetime import datetime
+from bs4 import BeautifulSoup
 
 
 class ArchiveDownloader:
@@ -32,7 +35,6 @@ class ArchiveDownloader:
         log_dir.mkdir(parents=True, exist_ok=True)
         log_file_name = f"{self.reciter_name}_{self.get_current_date()}.log"
         log_file = log_dir / log_file_name
-
         logging.basicConfig(
             level=logging.INFO,
             format="%(asctime)s - %(levelname)s - %(message)s",
@@ -41,9 +43,6 @@ class ArchiveDownloader:
         self.logger = logging.getLogger(__name__)
 
     def get_current_date(self):
-        """Get current date in YYYYMMDD format."""
-        from datetime import datetime
-
         return datetime.now().strftime("%Y%m%d")
 
     def extract_reciter_name(self, base_url):
@@ -87,7 +86,6 @@ class ArchiveDownloader:
         try:
             response = requests.get(self.download_url)
             response.raise_for_status()
-
             soup = BeautifulSoup(response.text, "html.parser")
             files = []
 
@@ -98,108 +96,57 @@ class ArchiveDownloader:
                     link = cols[0].find("a")
                     if link and "parent" not in link.get("href", ""):
                         filename = link.text.strip()
-                        # Correct URL construction to include reciter name
                         url = urljoin(
                             self.download_url, f"{self.reciter_name}/{link.get('href')}"
                         )
-                        last_modified = cols[1].text.strip()
-                        size = cols[2].text.strip()
-
-                        files.append(
-                            {
-                                "filename": filename,
-                                "url": url,
-                                "last_modified": last_modified,
-                                "size": size,
-                            }
-                        )
-
+                        files.append({"filename": filename, "url": url})
             return files
-
         except Exception as e:
             self.logger.error(f"Error getting file list: {e}")
             return []
 
-    def download_file(self, file_info, download_dir):
-        """
-        Download a single file with support for resuming if already partially downloaded.
+    def get_optimal_threads(self, target_cpu_usage=90):
+        cpu_usage = psutil.cpu_percent(interval=1)
+        available_cpu = max(
+            1, psutil.cpu_count() - int(cpu_usage * psutil.cpu_count() / 100)
+        )
+        return max(1, int((target_cpu_usage - cpu_usage) / 100 * available_cpu))
 
-        Args:
-            file_info (dict): File information dictionary
-            download_dir (Path): Download directory path
-
-        Returns:
-            dict: Updated file information including local path and status
-        """
+    def download_file_with_aria2(self, file_info, download_dir, max_connections=16):
         filename = file_info["filename"]
         url = file_info["url"]
         file_path = download_dir / filename
 
-        # Check if the file already exists and determine the size
         if file_path.exists():
-            existing_size = file_path.stat().st_size
-            self.logger.info(
-                f"Resuming download for: {filename}, already downloaded {existing_size} bytes"
-            )
-        else:
-            existing_size = 0  # File doesn't exist, start from zero
-
-        # Fetch file size from headers if available
-        try:
-            head_response = requests.head(url)
-            total_size = int(head_response.headers.get("content-length", 0))
-        except Exception as e:
-            self.logger.error(f"Error fetching head info for {filename}: {e}")
-            total_size = 0
-
-        # If file is already complete, skip download
-        if existing_size == total_size:
-            self.logger.info(f"{filename} is already fully downloaded.")
-            file_info["local_path"] = str(file_path)
-            file_info["status"] = "already_downloaded"
-            return file_info
-
-        # Set headers for resuming download
-        headers = {}
-        if existing_size > 0:
-            headers["Range"] = f"bytes={existing_size}-"
+            self.logger.info(f"{filename} already exists. Skipping download.")
+            return {"filename": filename, "status": "already_downloaded"}
 
         try:
-            response = requests.get(url, headers=headers, stream=True)
-            response.raise_for_status()
-
-            with open(file_path, "ab") as f, tqdm(
-                desc=filename,
-                total=total_size,
-                initial=existing_size,
-                unit="B",
-                unit_scale=True,
-                unit_divisor=1024,
-                leave=True,
-            ) as bar:
-                for chunk in response.iter_content(chunk_size=8192):
-                    if chunk:
-                        f.write(chunk)
-                        bar.update(len(chunk))
-
-            self.logger.info(f"Downloaded: {filename}")
-            file_info["local_path"] = str(file_path)
-            file_info["status"] = "downloaded"
-            return file_info
-
+            cmd = [
+                "aria2c",
+                "-x",
+                str(max_connections),
+                "-s",
+                str(max_connections),
+                "-d",
+                str(download_dir),
+                "-o",
+                filename,
+                url,
+            ]
+            result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            if result.returncode == 0:
+                self.logger.info(f"Downloaded: {filename}")
+                return {"filename": filename, "status": "downloaded"}
+            else:
+                error_msg = result.stderr.decode()
+                self.logger.error(f"Error downloading {filename}: {error_msg}")
+                return {"filename": filename, "status": "error", "error": error_msg}
         except Exception as e:
-            self.logger.error(f"Error downloading {filename}: {e}")
-            file_info["status"] = "error"
-            file_info["error"] = str(e)
-            return file_info
+            self.logger.error(f"Error downloading {filename} with aria2: {e}")
+            return {"filename": filename, "status": "error", "error": str(e)}
 
     def create_index(self, files):
-        """
-        Create index file with downloaded content information
-
-        Args:
-            files (list): List of file information dictionaries
-        """
         index = {
             "identifier": self.reciter_name,
             "base_url": self.base_url,
@@ -207,7 +154,6 @@ class ArchiveDownloader:
             "total_files": len(files),
             "files": files,
         }
-
         index_path = (
             Path(self.project_dir)
             / "downloads"
@@ -217,7 +163,6 @@ class ArchiveDownloader:
         )
         with open(index_path, "w", encoding="utf-8") as f:
             json.dump(index, f, indent=2, ensure_ascii=False)
-
         self.logger.info(f"Created index file: {index_path}")
 
     def download_all(self):
@@ -225,27 +170,25 @@ class ArchiveDownloader:
         Download all files and create index
         """
         download_dir = self.create_directories()
-
         files = self.get_file_list()
         if not files:
             self.logger.error("No files found to download")
             return
 
-        self.logger.info(f"Found {len(files)} files to download")
+        optimal_threads = self.get_optimal_threads()
+        self.logger.info(f"Starting downloads with {optimal_threads} threads")
 
-        # Download files using thread pool
-        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-            future_to_file = {
-                executor.submit(self.download_file, file_info, download_dir): file_info
+        downloaded_files = []
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=optimal_threads
+        ) as executor:
+            futures = [
+                executor.submit(self.download_file_with_aria2, file_info, download_dir)
                 for file_info in files
-            }
+            ]
+            for future in concurrent.futures.as_completed(futures):
+                downloaded_files.append(future.result())
 
-            downloaded_files = []
-            for future in concurrent.futures.as_completed(future_to_file):
-                result = future.result()
-                downloaded_files.append(result)
-
-        # Create index file
         self.create_index(downloaded_files)
 
 
@@ -257,7 +200,6 @@ def main(base_url: str):
         base_url (str): The base URL of the archive.org content
     """
     project_dir = "."  # Current directory, modify as needed
-
     try:
         downloader = ArchiveDownloader(base_url, project_dir)
         downloader.download_all()
