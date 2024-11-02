@@ -30,6 +30,27 @@ keyboard = "^0.13.5"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.2"
+python-semantic-release = "^9.12.0"
+
+[tool.semantic_release]
+version_source = "pyproject"  # Ambil versi dari pyproject.toml
+changelog_file = "CHANGELOG.md"
+patch_without_tag = false
+commit_parser = "angular"
+
+[tool.semantic_release.changelog]
+mode = "update"  # Mode update, hanya menambahkan informasi terbaru
+insertion_flag = "<!-- version list -->"  # Flag untuk penempatan informasi baru dalam changelog
+exclude_commit_patterns = [
+  '''chore(?:\([^)]*?\))?: .+''',
+  '''ci(?:\([^)]*?\))?: .+''',
+  '''refactor(?:\([^)]*?\))?: .+''',
+  '''style(?:\([^)]*?\))?: .+''',
+  '''test(?:\([^)]*?\))?: .+''',
+  '''build\((?!deps\): .+)''',
+  '''Merged? .*'''
+]
+
 
 [build-system]
 requires = ["poetry-core"]
