@@ -14,6 +14,7 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 from rich.logging import RichHandler  # Import RichHandler dari rich
 from rich.console import Console  # Import Console untuk output
+import keyboard  # Import keyboard untuk menangkap input dari keyboard
 
 
 class ArchiveDownloader:
@@ -31,6 +32,10 @@ class ArchiveDownloader:
         self.reciter_name = self.extract_reciter_name(base_url)
         self.download_url = self.generate_download_url(base_url)
         self.setup_logging()
+        self.is_running = True  # Flag to control the running state
+
+        # Set up the abort function
+        keyboard.add_hotkey('ctrl+x', self.abort_process)  # Listen for CTRL + X
 
     def setup_logging(self):
         """Setup logging configuration"""
@@ -231,7 +236,14 @@ class ArchiveDownloader:
                     self.console.print(f"[red]Error:[/red] {result['filename']} - {result.get('error', 'Unknown error')}")
 
         self.create_index(downloaded_files)
+        self.console.print("[cyan]Download completed![/cyan]")
 
+    def abort_process(self):
+        """Abort the download process."""
+        self.is_running = False
+        self.console.print("[red]Process aborted! Exiting the application...[/red]")
+        os._exit(0)  # Exit the application immediately
+        
 
 def main(base_url: str):
     """
@@ -242,13 +254,13 @@ def main(base_url: str):
     """
     project_dir = "."  # Current directory, modify as needed
     try:
+        print("Press CTRL + X to abort and exit the application.")
         downloader = ArchiveDownloader(base_url, project_dir)
         downloader.download_all()
     except ValueError as ve:
         typer.echo(f"Error: {ve}")
     except Exception as e:
         typer.echo(f"An unexpected error occurred: {e}")
-
 
 if __name__ == "__main__":
     typer.run(main)
