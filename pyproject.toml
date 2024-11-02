@@ -1,9 +1,10 @@
 [tool.poetry]
 name = "archive-downloader"
 version = "0.1.0"
-description = "A starter CLI app project in Python"
+description = "Archive Downloader simplifies bulk downloads from archive.org in Python"
 authors = ["Andy Vandaric <andyvandaric@gmail.com>"]
 readme = "README.md"
+license = "MIT"
 repository = "https://github.com/andyvandaric/archive-downloader"
 
 [tool.poetry.dependencies]
@@ -25,7 +26,6 @@ version_source = "pyproject"
 changelog_file = "CHANGELOG.md"
 patch_without_tag = false
 commit_parser = "angular"
-tag_format = "v{version}"
 
 [tool.semantic_release.changelog]
 mode = "update"
