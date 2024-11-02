@@ -17,18 +17,19 @@ jobs:
         with:
           python-version: '3.12'  # Sesuaikan dengan versi Python Anda
 
-      - name: Install dependencies
+      - name: Install Poetry
         run: |
-          pip install poetry
-          poetry install
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "${{ github.workspace }}/.local/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: poetry install  # Menginstal dependensi yang didefinisikan di pyproject.toml
 
       - name: Build standalone application
-        run: |
-          python build.py  # Menjalankan skrip build
+        run: poetry run python build.py  # Menjalankan skrip build
 
       - name: Zip executable
-        run: |
-          zip -r archive-downloader-linux.zip dist/*  # Mengompresi file executable ke ZIP
+        run: zip -r archive-downloader-linux.zip dist/*  # Mengompresi file executable ke ZIP
 
       - name: Run semantic release
         id: release
@@ -56,18 +57,19 @@ jobs:
         with:
           python-version: '3.12'  # Sesuaikan dengan versi Python Anda
 
-      - name: Install dependencies
+      - name: Install Poetry
         run: |
-          pip install poetry
-          poetry install
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "${{ github.workspace }}/.local/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: poetry install  # Menginstal dependensi yang didefinisikan di pyproject.toml
 
       - name: Build standalone application
-        run: |
-          python build.py  # Menjalankan skrip build
+        run: poetry run python build.py  # Menjalankan skrip build
 
       - name: Zip executable
-        run: |
-          zip -r archive-downloader-macos.zip dist/*  # Mengompresi file executable ke ZIP
+        run: zip -r archive-downloader-macos.zip dist/*  # Mengompresi file executable ke ZIP
 
       - name: Run semantic release
         id: release
@@ -95,18 +97,19 @@ jobs:
         with:
           python-version: '3.12'  # Sesuaikan dengan versi Python Anda
 
-      - name: Install dependencies
+      - name: Install Poetry
         run: |
-          pip install poetry
-          poetry install
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "${{ github.workspace }}/.local/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: poetry install  # Menginstal dependensi yang didefinisikan di pyproject.toml
 
       - name: Build standalone application
-        run: |
-          python build.py  # Menjalankan skrip build
+        run: poetry run python build.py  # Menjalankan skrip build
 
       - name: Zip executable
-        run: |
-          powershell -Command "Compress-Archive -Path 'dist/*' -DestinationPath 'archive-downloader-windows.zip'"  # Mengompresi file executable ke ZIP
+        run: powershell -Command "Compress-Archive -Path 'dist/*' -DestinationPath 'archive-downloader-windows.zip'"  # Mengompresi file executable ke ZIP
 
       - name: Run semantic release
         id: release
