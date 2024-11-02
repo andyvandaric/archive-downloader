@@ -46,11 +46,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Check current branch
-        run: git branch
-
       - name: Check remote tags
         run: git ls-remote --tags origin
+
+      - name: Fetch all tags
+        run: git fetch --tags
 
       - name: List Tags
         run: git tag
@@ -110,11 +110,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Check current branch
-        run: git branch
-
       - name: Check remote tags
         run: git ls-remote --tags origin
+
+      - name: Fetch all tags
+        run: git fetch --tags
 
       - name: List Tags
         run: git tag
@@ -176,11 +176,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Check current branch
-        run: git branch
-
       - name: Check remote tags
         run: git ls-remote --tags origin
+
+      - name: Fetch all tags
+        run: git fetch --tags
 
       - name: List Tags
         run: git tag
