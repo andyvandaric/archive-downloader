@@ -1,0 +1,72 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+*.pyd
+
+# Poetry virtual environments
+.venv/
+poetry.lock
+
+# PyInstaller
+# Usually these files are generated when PyInstaller is run
+/build/
+dist/
+*.spec
+
+# PyArmor
+*.pyarmor
+.pyarmor_config/
+pyarmor_output/
+
+# Sphinx documentation
+docs/_build/
+docs/build/
+
+# MacOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+
+# VS Code
+.vscode/
+
+# Python eggs
+*.egg
+*.egg-info/
+
+# Caches
+*.log
+*.cache
+*.coverage
+.cache/
+
+# Distribution / packaging
+.Python
+env/
+env.bak/
+pip-wheel-metadata/
+lib/
+
+# Unit test / coverage reports
+htmlcov/
+.coverage
+.tox/
+
+# Generated files
+*.bak
+
+# har and cookies
+config/har_and_cookies/
+
+# Ignore output files
+data/
+dashboard/
+downloads/
+# Database files
+*.db
+*.sqlite3
