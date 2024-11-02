@@ -1,6 +1,6 @@
 import os
 import json
-import concurrent.futures  # Import langsung futures di sini
+import concurrent.futures  # Directly import futures here
 import requests
 import subprocess
 import psutil
@@ -12,19 +12,19 @@ import typer
 from tqdm import tqdm
 from datetime import datetime
 from bs4 import BeautifulSoup
-from rich.logging import RichHandler  # Import RichHandler dari rich
-from rich.console import Console  # Import Console untuk output
-import keyboard  # Import keyboard untuk menangkap input dari keyboard
+from rich.logging import RichHandler  # Import RichHandler from rich
+from rich.console import Console  # Import Console for output
+import keyboard  # Import keyboard to capture keyboard input
 
 
 class ArchiveDownloader:
     def __init__(self, base_url, project_dir):
         """
-        Initialize the downloader
+        Initialize the downloader.
 
         Args:
-            base_url (str): Base URL of the archive.org content
-            project_dir (str): Base project directory
+            base_url (str): Base URL of the archive.org content.
+            project_dir (str): Base project directory.
         """
         self.console = Console()  # Initialize the console instance
         self.base_url = base_url
@@ -38,7 +38,7 @@ class ArchiveDownloader:
         keyboard.add_hotkey('ctrl+x', self.abort_process)  # Listen for CTRL + X
 
     def setup_logging(self):
-        """Setup logging configuration"""
+        """Setup logging configuration."""
         log_dir = Path(self.project_dir) / "data" / "outputs" / "logs"
         log_dir.mkdir(parents=True, exist_ok=True)
         log_file_name = f"{self.reciter_name}_{self.get_current_date()}.log"
@@ -54,17 +54,38 @@ class ArchiveDownloader:
         self.logger = logging.getLogger(__name__)
 
     def get_current_date(self):
+        """Get the current date formatted as YYYYMMDD."""
         return datetime.now().strftime("%Y%m%d")
 
     def extract_reciter_name(self, base_url):
-        """Extract the reciter name from the URL."""
+        """Extract the reciter name from the URL.
+
+        Args:
+            base_url (str): Base URL from which to extract the reciter name.
+
+        Returns:
+            str: Extracted reciter name.
+
+        Raises:
+            ValueError: If the URL format is invalid.
+        """
         if "details" in base_url:
             return re.search(r"/details/([^/]+)", base_url).group(1)
         else:
             raise ValueError("Invalid URL format. Must contain 'details'.")
 
     def generate_download_url(self, base_url):
-        """Generate the download URL based on the base URL."""
+        """Generate the download URL based on the base URL.
+
+        Args:
+            base_url (str): Base URL to generate the download URL from.
+
+        Returns:
+            str: Generated download URL.
+
+        Raises:
+            ValueError: If the URL format is invalid.
+        """
         if "details" in base_url:
             return base_url.replace("/details/", "/download/")
         elif "download" in base_url:
@@ -76,10 +97,10 @@ class ArchiveDownloader:
 
     def create_directories(self):
         """
-        Create necessary directories
+        Create necessary directories.
 
         Returns:
-            Path: Download directory path
+            Path: Download directory path.
         """
         download_dir = (
             Path(self.project_dir) / "downloads" / "recitation" / self.reciter_name
@@ -89,10 +110,10 @@ class ArchiveDownloader:
 
     def get_file_list(self):
         """
-        Get list of files from archive.org download page
+        Get a list of files from the archive.org download page.
 
         Returns:
-            list: List of file information dictionaries
+            list: List of file information dictionaries.
         """
         try:
             response = requests.get(self.download_url)
@@ -117,6 +138,14 @@ class ArchiveDownloader:
             return []
 
     def get_optimal_threads(self, target_cpu_usage=90):
+        """Determine the optimal number of threads for downloading based on CPU usage.
+
+        Args:
+            target_cpu_usage (int): Target CPU usage percentage.
+
+        Returns:
+            int: Optimal number of threads.
+        """
         cpu_usage = psutil.cpu_percent(interval=1)
         available_cpu = max(
             1, psutil.cpu_count() - int(cpu_usage * psutil.cpu_count() / 100)
@@ -124,6 +153,16 @@ class ArchiveDownloader:
         return max(1, int((target_cpu_usage - cpu_usage) / 100 * available_cpu))
 
     def download_file_with_aria2(self, file_info, download_dir, max_connections=16):
+        """Download a file using aria2.
+
+        Args:
+            file_info (dict): Information about the file to download.
+            download_dir (Path): Directory to save the downloaded file.
+            max_connections (int): Maximum number of connections for downloading.
+
+        Returns:
+            dict: Result of the download attempt, including filename and status.
+        """
         filename = file_info["filename"]
         url = file_info["url"]
         file_path = download_dir / filename
@@ -185,6 +224,11 @@ class ArchiveDownloader:
             return {"filename": filename, "status": "error", "error": str(e)}
 
     def create_index(self, files):
+        """Create an index file for the downloaded files.
+
+        Args:
+            files (list): List of downloaded files.
+        """
         index = {
             "identifier": self.reciter_name,
             "base_url": self.base_url,
@@ -205,7 +249,7 @@ class ArchiveDownloader:
 
     def download_all(self):
         """
-        Download all files and create index
+        Download all files and create an index.
         """
         download_dir = self.create_directories()
         files = self.get_file_list()
@@ -227,7 +271,7 @@ class ArchiveDownloader:
             for future in concurrent.futures.as_completed(futures):
                 result = future.result()
                 downloaded_files.append(result)
-                # Tampilkan informasi hasil download di terminal dengan Rich
+                # Display download results in the terminal with Rich
                 if result["status"] == "downloaded":
                     self.console.print(f"[green]Downloaded:[/green] {result['filename']}")
                 elif result["status"] == "already_downloaded":
@@ -247,10 +291,10 @@ class ArchiveDownloader:
 
 def main(base_url: str):
     """
-    Main function to download files from archive.org
+    Main function to download files from archive.org.
 
     Args:
-        base_url (str): The base URL of the archive.org content
+        base_url (str): The base URL of the archive.org content.
     """
     project_dir = "."  # Current directory, modify as needed
     try:
